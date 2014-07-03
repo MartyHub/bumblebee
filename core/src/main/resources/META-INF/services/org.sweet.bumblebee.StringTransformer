@@ -1,0 +1,17 @@
+# standard Java type
+org.sweet.bumblebee.transformer.BigDecimalStringTransformer
+org.sweet.bumblebee.transformer.BigIntegerStringTransformer
+org.sweet.bumblebee.transformer.BooleanStringTransformer
+org.sweet.bumblebee.transformer.ByteStringTransformer
+org.sweet.bumblebee.transformer.CharacterStringTransformer
+org.sweet.bumblebee.transformer.ClassStringTransformer
+org.sweet.bumblebee.transformer.DateStringTransformer
+org.sweet.bumblebee.transformer.DoubleStringTransformer
+org.sweet.bumblebee.transformer.FileStringTransformer
+org.sweet.bumblebee.transformer.FloatStringTransformer
+org.sweet.bumblebee.transformer.IntegerStringTransformer
+org.sweet.bumblebee.transformer.LongStringTransformer
+org.sweet.bumblebee.transformer.ShortStringTransformer
+org.sweet.bumblebee.transformer.StringStringTransformer
+org.sweet.bumblebee.transformer.TimestampStringTransformer
+org.sweet.bumblebee.transformer.TimeStringTransformer
