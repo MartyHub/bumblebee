@@ -25,25 +25,28 @@ public class StringTransformerRegistryBuilderTest {
     @Test
     public void convert_local_date() {
         test(LocalDate.class, "2014-07-01", LocalDate.of(2014, 7, 1));
+        test(LocalDate.class, "20140701", LocalDate.of(2014, 7, 1));
     }
 
     @Test
     public void convert_local_date_time() {
         test(LocalDateTime.class, "2014-07-01T14:20:05", LocalDateTime.of(2014, 7, 1, 14, 20, 5));
+        test(LocalDateTime.class, "20140701142005", LocalDateTime.of(2014, 7, 1, 14, 20, 5));
     }
 
     @Test
     public void convert_local_time() {
         test(LocalTime.class, "14:20:05", LocalTime.of(14, 20, 5));
+        test(LocalTime.class, "142005", LocalTime.of(14, 20, 5));
     }
 
     @Test
     public void test_override() {
         String name = "myProperty";
 
-        stringTransformerRegistry.register(new LocalDateStringTransformer("yyyyMMdd"), name);
+        stringTransformerRegistry.register(new LocalDateStringTransformer("dd/MM/yyyy"), name);
 
-        test(name, LocalDate.class, "20140701", LocalDate.of(2014, 7, 1));
+        test(name, LocalDate.class, "01/07/2014", LocalDate.of(2014, 7, 1));
         test(LocalDate.class, "2014-07-01", LocalDate.of(2014, 7, 1));
     }
 

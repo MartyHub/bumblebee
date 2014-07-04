@@ -7,8 +7,12 @@ import org.sweet.bumblebee.registry.DefaultStringTransformerRegistry;
 import org.sweet.bumblebee.registry.EnumStringTransformerRegistryAdapter;
 import org.sweet.bumblebee.registry.ExceptionStringTransformerRegistryAdapter;
 import org.sweet.bumblebee.registry.PrimitiveStringTransformerRegistryAdapter;
+import org.sweet.bumblebee.transformer.StringTransformerContext;
+import org.sweet.bumblebee.transformer.StringTransformerWithContext;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
@@ -16,7 +20,9 @@ public class StringTransformerRegistryBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StringTransformerRegistryBuilder.class);
 
-    private final StringTransformerRegistry defaultStringTransformerRegistry = new DefaultStringTransformerRegistry();
+    private final StringTransformerContext.Builder contextBuilder = StringTransformerContext.builder();
+
+    private final Map<StringTransformer, String> transformers = new HashMap<StringTransformer, String>();
 
     private boolean enumEnabled;
 
@@ -26,21 +32,10 @@ public class StringTransformerRegistryBuilder {
 
     private boolean exceptionEnabled;
 
-    public StringTransformerRegistryBuilder() {
-        for (Iterator<StringTransformer> it = ServiceLoader.load(StringTransformer.class)
-                .iterator(); it.hasNext(); ) {
-            try {
-                final StringTransformer stringTransformer = it.next();
-
-                defaultStringTransformerRegistry.register(stringTransformer);
-            } catch (ServiceConfigurationError e) {
-                LOGGER.warn("Failed to load a StringTransformer", e);
-            }
-        }
-    }
-
     public StringTransformerRegistry build() {
-        StringTransformerRegistry result = defaultStringTransformerRegistry;
+        StringTransformerRegistry result = new DefaultStringTransformerRegistry();
+
+        registerTransformers(result, contextBuilder.build());
 
         if (enumEnabled) {
             result = new EnumStringTransformerRegistryAdapter(result);
@@ -62,7 +57,7 @@ public class StringTransformerRegistryBuilder {
     }
 
     public StringTransformerRegistryBuilder register(StringTransformer stringTransformer, String name) {
-        defaultStringTransformerRegistry.register(stringTransformer, name);
+        transformers.put(stringTransformer, name);
 
         return this;
     }
@@ -111,5 +106,58 @@ public class StringTransformerRegistryBuilder {
         exceptionEnabled = enabled;
 
         return this;
+    }
+
+    public StringTransformerRegistryBuilder trueMappings(String... mappings) {
+        contextBuilder.trueMappings(mappings);
+
+        return this;
+    }
+
+    public StringTransformerRegistryBuilder falseMappings(String... mappings) {
+        contextBuilder.falseMappings(mappings);
+
+        return this;
+    }
+
+    public StringTransformerRegistryBuilder dateMappings(String... patterns) {
+        contextBuilder.dateMappings(patterns);
+
+        return this;
+    }
+
+    public StringTransformerRegistryBuilder timeMappings(String... patterns) {
+        contextBuilder.timeMappings(patterns);
+
+        return this;
+    }
+
+    public StringTransformerRegistryBuilder dateTimeMappings(String... patterns) {
+        contextBuilder.dateTimeMappings(patterns);
+
+        return this;
+    }
+
+    private void registerTransformers(StringTransformerRegistry registry, StringTransformerContext context) {
+        for (Iterator<StringTransformer> it = ServiceLoader.load(StringTransformer.class)
+                .iterator(); it.hasNext(); ) {
+            try {
+                registry.register(setContext(it.next(), context));
+            } catch (ServiceConfigurationError e) {
+                LOGGER.warn("Failed to load a StringTransformer", e);
+            }
+        }
+
+        for (Map.Entry<StringTransformer, String> entry : transformers.entrySet()) {
+            registry.register(setContext(entry.getKey(), context), entry.getValue());
+        }
+    }
+
+    private StringTransformer setContext(StringTransformer stringTransformer, StringTransformerContext context) {
+        if (stringTransformer instanceof StringTransformerWithContext) {
+            ((StringTransformerWithContext) stringTransformer).setContext(context);
+        }
+
+        return stringTransformer;
     }
 }

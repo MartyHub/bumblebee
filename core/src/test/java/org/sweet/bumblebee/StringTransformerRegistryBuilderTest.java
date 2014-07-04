@@ -46,10 +46,18 @@ public class StringTransformerRegistryBuilderTest {
     @Test
     public void convert_boolean() {
         test(Boolean.class, "y", Boolean.TRUE);
+        test(Boolean.class, "yes", Boolean.TRUE);
+        test(Boolean.class, "true", Boolean.TRUE);
         test(Boolean.class, "n", Boolean.FALSE);
+        test(Boolean.class, "no", Boolean.FALSE);
+        test(Boolean.class, "false", Boolean.FALSE);
 
         test(Boolean.TYPE, "y", Boolean.TRUE);
+        test(Boolean.TYPE, "yes", Boolean.TRUE);
+        test(Boolean.TYPE, "true", Boolean.TRUE);
         test(Boolean.TYPE, "n", Boolean.FALSE);
+        test(Boolean.TYPE, "no", Boolean.FALSE);
+        test(Boolean.TYPE, "false", Boolean.FALSE);
     }
 
     @Test
@@ -71,9 +79,11 @@ public class StringTransformerRegistryBuilderTest {
 
     @Test
     public void convert_date() throws ParseException {
-        final String date = "2014-07-03T12:02:30";
-
+        String date = "2014-07-03T12:02:30";
         test(Date.class, date, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(date));
+
+        date = "20140703120230";
+        test(Date.class, date, new SimpleDateFormat("yyyyMMddHHmmss").parse(date));
     }
 
     @Test
