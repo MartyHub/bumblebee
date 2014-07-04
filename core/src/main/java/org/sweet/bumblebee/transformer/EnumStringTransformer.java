@@ -2,8 +2,7 @@ package org.sweet.bumblebee.transformer;
 
 import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
-
-import java.util.Arrays;
+import org.sweet.bumblebee.util.Joiner;
 
 public class EnumStringTransformer<E extends Enum<E>> implements StringTransformer<E> {
 
@@ -28,27 +27,17 @@ public class EnumStringTransformer<E extends Enum<E>> implements StringTransform
 
         for (E enumConstant : enumConstants) {
             if (enumConstant.name()
-                    .equals(s)) {
+                    .equalsIgnoreCase(s)) {
                 return enumConstant;
             }
         }
 
-        throw new BumblebeeException(String.format("Invalid value <%s>, must be one of %s", s, Arrays.toString(enumConstants)));
+        throw new BumblebeeException(String.format("Invalid value <%s>, must be one of <%s>", s, new Joiner().join(enumConstants)));
     }
 
     @Override
     public String getUsage() {
-        StringBuilder sb = new StringBuilder();
-
-        for (E enumConstant : enumClass.getEnumConstants()) {
-            if (sb.length() > 0) {
-                sb.append(", ");
-            }
-
-            sb.append(enumConstant.name());
-        }
-
-        return sb.toString();
+        return new Joiner().join(enumClass.getEnumConstants());
     }
 
     @Override
