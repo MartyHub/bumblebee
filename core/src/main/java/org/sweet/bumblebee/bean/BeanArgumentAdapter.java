@@ -2,12 +2,14 @@ package org.sweet.bumblebee.bean;
 
 import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.Doc;
+import org.sweet.bumblebee.Optional;
 import org.sweet.bumblebee.util.ValidationResult;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.util.StringTokenizer;
 
 public class BeanArgumentAdapter implements Comparable<BeanArgumentAdapter> {
@@ -29,20 +31,21 @@ public class BeanArgumentAdapter implements Comparable<BeanArgumentAdapter> {
             throw new NullPointerException();
         }
 
+        Method writeMethod = propertyDescriptor.getWriteMethod();
+
+        if (writeMethod == null) {
+            throw new BumblebeeException(String.format("Failed to find a setter for <%s>", propertyDescriptor));
+        }
+
         this.javaName = propertyDescriptor.getName();
+        this.displayName = javaName;
         this.type = propertyDescriptor.getPropertyType();
         this.subProperty = false;
-        this.optional = javaName.startsWith("optional");
-        this.displayName = optional ? Introspector.decapitalize(javaName.substring(8)) : javaName;
+        this.optional = writeMethod.getAnnotation(Optional.class) != null;
 
-        if (propertyDescriptor.getWriteMethod() == null) {
-            this.doc = null;
-        } else {
-            Doc docAnnotation = propertyDescriptor.getWriteMethod()
-                    .getAnnotation(Doc.class);
+        Doc docAnnotation = writeMethod.getAnnotation(Doc.class);
 
-            this.doc = docAnnotation == null ? null : docAnnotation.value();
-        }
+        this.doc = docAnnotation == null ? null : docAnnotation.value();
     }
 
     private BeanArgumentAdapter(String javaName, String displayName, Class<?> type, final boolean optional, String doc) {
