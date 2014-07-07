@@ -11,6 +11,7 @@ org.sweet.bumblebee.transformer.FileStringTransformer
 org.sweet.bumblebee.transformer.FloatStringTransformer
 org.sweet.bumblebee.transformer.IntegerStringTransformer
 org.sweet.bumblebee.transformer.LongStringTransformer
+org.sweet.bumblebee.transformer.PropertiesStringTransformer
 org.sweet.bumblebee.transformer.ShortStringTransformer
 org.sweet.bumblebee.transformer.StringStringTransformer
 org.sweet.bumblebee.transformer.TimestampStringTransformer

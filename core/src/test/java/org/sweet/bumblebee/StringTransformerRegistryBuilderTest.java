@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.sweet.bumblebee.transformer.DateStringTransformer;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -13,6 +15,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -118,6 +121,33 @@ public class StringTransformerRegistryBuilderTest {
     public void convert_long() {
         test(Long.class, "1234567890", 1234567890L);
         test(Long.TYPE, "1234567890", 1234567890L);
+    }
+
+    @Test
+    public void convert_properties() throws IOException {
+        final String value = "META-INF/services/org.sweet.bumblebee.StringTransformer";
+        Properties properties = new Properties();
+
+        InputStream is = null;
+
+        try {
+            is = ClassLoader.getSystemResourceAsStream(value);
+
+            if (is == null) {
+                throw new NullPointerException();
+            }
+
+            properties.load(is);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+
+        test(Properties.class, value, properties);
     }
 
     @Test
