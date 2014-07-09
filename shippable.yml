@@ -3,5 +3,12 @@ language: java
 jdk:
  - oraclejdk7
 
+branches:
+ only:
+  - master
+
+script:
+ - mvn -P shippable test
+
 after_success:
- - mvn clean cobertura:cobertura
+ - mvn -P shippable clean cobertura:cobertura
