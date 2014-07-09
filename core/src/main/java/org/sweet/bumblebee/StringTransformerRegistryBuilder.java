@@ -2,25 +2,17 @@ package org.sweet.bumblebee;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sweet.bumblebee.registry.ArrayStringTransformerRegistryAdapter;
-import org.sweet.bumblebee.registry.DefaultStringTransformerRegistry;
-import org.sweet.bumblebee.registry.EnumStringTransformerRegistryAdapter;
-import org.sweet.bumblebee.registry.ExceptionStringTransformerRegistryAdapter;
-import org.sweet.bumblebee.registry.PrimitiveStringTransformerRegistryAdapter;
+import org.sweet.bumblebee.registry.*;
 import org.sweet.bumblebee.transformer.StringTransformerContext;
 import org.sweet.bumblebee.transformer.StringTransformerWithContext;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
+import java.util.*;
 
 public class StringTransformerRegistryBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StringTransformerRegistryBuilder.class);
 
-    private final StringTransformerContext.Builder contextBuilder = StringTransformerContext.builder();
+    private final StringTransformerContext context = new StringTransformerContext();
 
     private final Map<StringTransformer, String> transformers = new HashMap<StringTransformer, String>();
 
@@ -35,7 +27,7 @@ public class StringTransformerRegistryBuilder {
     public StringTransformerRegistry build() {
         StringTransformerRegistry result = new DefaultStringTransformerRegistry();
 
-        registerTransformers(result, contextBuilder.build());
+        registerTransformers(result, context);
 
         if (enumEnabled) {
             result = new EnumStringTransformerRegistryAdapter(result);
@@ -63,9 +55,7 @@ public class StringTransformerRegistryBuilder {
     }
 
     public StringTransformerRegistryBuilder withAll() {
-        return withArray().withEnum()
-                .withException()
-                .withPrimitive();
+        return withArray().withEnum().withException().withPrimitive();
     }
 
     public StringTransformerRegistryBuilder withEnum() {
@@ -109,38 +99,43 @@ public class StringTransformerRegistryBuilder {
     }
 
     public StringTransformerRegistryBuilder trueMappings(String... mappings) {
-        contextBuilder.trueMappings(mappings);
+        context.setProperty(StringTransformerContext.TRUE_MAPPINGS, mappings);
 
         return this;
     }
 
     public StringTransformerRegistryBuilder falseMappings(String... mappings) {
-        contextBuilder.falseMappings(mappings);
+        context.setProperty(StringTransformerContext.FALSE_MAPPINGS, mappings);
 
         return this;
     }
 
-    public StringTransformerRegistryBuilder dateMappings(String... patterns) {
-        contextBuilder.dateMappings(patterns);
+    public StringTransformerRegistryBuilder datePatterns(String... patterns) {
+        context.setProperty(StringTransformerContext.DATE_PATTERNS, patterns);
 
         return this;
     }
 
-    public StringTransformerRegistryBuilder timeMappings(String... patterns) {
-        contextBuilder.timeMappings(patterns);
+    public StringTransformerRegistryBuilder timePatterns(String... patterns) {
+        context.setProperty(StringTransformerContext.TIME_PATTERNS, patterns);
 
         return this;
     }
 
-    public StringTransformerRegistryBuilder dateTimeMappings(String... patterns) {
-        contextBuilder.dateTimeMappings(patterns);
+    public StringTransformerRegistryBuilder dateTimePatterns(String... patterns) {
+        context.setProperty(StringTransformerContext.DATE_TIME_PATTERNS, patterns);
+
+        return this;
+    }
+
+    public StringTransformerRegistryBuilder property(String name, String... values) {
+        context.setProperty(name, values);
 
         return this;
     }
 
     private void registerTransformers(StringTransformerRegistry registry, StringTransformerContext context) {
-        for (Iterator<StringTransformer> it = ServiceLoader.load(StringTransformer.class)
-                .iterator(); it.hasNext(); ) {
+        for (Iterator<StringTransformer> it = ServiceLoader.load(StringTransformer.class).iterator(); it.hasNext(); ) {
             try {
                 registry.register(setContext(it.next(), context));
             } catch (ServiceConfigurationError e) {

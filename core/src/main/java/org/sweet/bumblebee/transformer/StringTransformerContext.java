@@ -1,117 +1,61 @@
 package org.sweet.bumblebee.transformer;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class StringTransformerContext {
 
-    public static final Builder builder() {
-        return new Builder();
+    public static final String TRUE_MAPPINGS = "TRUE_MAPPINGS";
+
+    public static final String FALSE_MAPPINGS = "FALSE_MAPPINGS";
+
+    public static final String DATE_PATTERNS = "DATE_PATTERNS";
+
+    public static final String TIME_PATTERNS = "TIME_PATTERNS";
+
+    public static final String DATE_TIME_PATTERNS = "DATE_TIME_PATTERNS";
+
+    private final Map<String, String[]> properties = new HashMap<String, String[]>(5);
+
+    public StringTransformerContext() {
+        properties.put(TRUE_MAPPINGS, new String[]{"y", "yes", "true"});
+        properties.put(FALSE_MAPPINGS, new String[]{"n", "no", "false"});
+        properties.put(DATE_PATTERNS, new String[]{"yyyy-MM-dd", "yyyyMMdd"});
+        properties.put(TIME_PATTERNS, new String[]{"HH:mm:ss", "HHmmss"});
+        properties.put(DATE_TIME_PATTERNS, new String[]{"yyyy-MM-dd'T'HH:mm:ss", "yyyyMMddHHmmss"});
     }
 
-    public static class Builder {
+    public String[] getProperty(String name) {
+        String[] values = properties.get(name);
 
-        private final StringTransformerContext result = new StringTransformerContext();
-
-        public Builder trueMappings(String... mappings) {
-            result.setTrueMappings(mappings);
-
-            return this;
+        if (values == null) {
+            return new String[0];
         }
 
-        public Builder falseMappings(String... mappings) {
-            result.setFalseMappings(mappings);
-
-            return this;
-        }
-
-        public Builder dateMappings(String... patterns) {
-            result.setDatePatterns(patterns);
-
-            return this;
-        }
-
-        public Builder timeMappings(String... patterns) {
-            result.setTimePatterns(patterns);
-
-            return this;
-        }
-
-        public Builder dateTimeMappings(String... patterns) {
-            result.setDateTimePatterns(patterns);
-
-            return this;
-        }
-
-        public StringTransformerContext build() {
-            return result;
-        }
+        return values;
     }
 
-    private String[] trueMappings = {"y", "yes", "true"};
-
-    private String[] falseMappings = {"n", "no", "false"};
-
-    private String[] datePatterns = {"yyyy-MM-dd", "yyyyMMdd"};
-
-    private String[] timePatterns = {"HH:mm:ss", "HHmmss"};
-
-    private String[] dateTimePatterns = {"yyyy-MM-dd'T'HH:mm:ss", "yyyyMMddHHmmss"};
+    public void setProperty(String name, String[] values) {
+        properties.put(name, values);
+    }
 
     public String[] getTrueMappings() {
-        return trueMappings;
+        return getProperty(TRUE_MAPPINGS);
     }
 
     public String[] getFalseMappings() {
-        return falseMappings;
+        return getProperty(FALSE_MAPPINGS);
     }
 
     public String[] getDatePatterns() {
-        return datePatterns;
+        return getProperty(DATE_PATTERNS);
     }
 
     public String[] getTimePatterns() {
-        return timePatterns;
+        return getProperty(TIME_PATTERNS);
     }
 
     public String[] getDateTimePatterns() {
-        return dateTimePatterns;
-    }
-
-    private void setTrueMappings(String[] trueMappings) {
-        if (trueMappings == null) {
-            throw new NullPointerException();
-        }
-
-        this.trueMappings = trueMappings;
-    }
-
-    private void setFalseMappings(String[] falseMappings) {
-        if (falseMappings == null) {
-            throw new NullPointerException();
-        }
-
-        this.falseMappings = falseMappings;
-    }
-
-    private void setDatePatterns(String[] datePatterns) {
-        if (datePatterns == null) {
-            throw new NullPointerException();
-        }
-
-        this.datePatterns = datePatterns;
-    }
-
-    private void setTimePatterns(String[] timePatterns) {
-        if (timePatterns == null) {
-            throw new NullPointerException();
-        }
-
-        this.timePatterns = timePatterns;
-    }
-
-    private void setDateTimePatterns(String[] dateTimePatterns) {
-        if (dateTimePatterns == null) {
-            throw new NullPointerException();
-        }
-
-        this.dateTimePatterns = dateTimePatterns;
+        return getProperty(DATE_TIME_PATTERNS);
     }
 }
