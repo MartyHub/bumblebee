@@ -11,7 +11,7 @@ public class BeanArgumentsBuilder<T> extends BeanBuilder<T> {
 
     private final Iterable<Argument> arguments;
 
-    public BeanArgumentsBuilder(BeanArgumentsIntrospector beanArgumentsIntrospector, T bean, Iterable<Argument> arguments) {
+    public BeanArgumentsBuilder(BeanArgumentsIntrospector<T> beanArgumentsIntrospector, T bean, Iterable<Argument> arguments) {
         super(beanArgumentsIntrospector, bean);
 
         this.arguments = arguments;

@@ -14,7 +14,7 @@ public class BeanArgumentsIntrospectorTest {
 
     @Before
     public void setup() {
-        beanArgumentsIntrospector = new BeanArgumentsIntrospector(new StringTransformerRegistryBuilder().withAll()
+        beanArgumentsIntrospector = new BeanArgumentsIntrospector<SampleBean>(new StringTransformerRegistryBuilder().withAll()
                 .build(), SampleBean.class);
     }
 

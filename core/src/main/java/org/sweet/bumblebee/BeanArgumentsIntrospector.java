@@ -21,6 +21,7 @@ public class BeanArgumentsIntrospector<T> implements Iterable<BeanArgumentAdapte
 
     private final Class<T> beanClass;
 
+    @SuppressWarnings("unchecked")
     public BeanArgumentsIntrospector(StringTransformerRegistry stringTransformerRegistry, Class<T> beanClass) {
         if (stringTransformerRegistry == null) {
             throw new NullPointerException();
@@ -84,7 +85,7 @@ public class BeanArgumentsIntrospector<T> implements Iterable<BeanArgumentAdapte
     }
 
     public String getUsage() {
-        BeanUsageBuilder beanUsageBuilder = new BeanUsageBuilder(this);
+        BeanUsageBuilder<T> beanUsageBuilder = new BeanUsageBuilder<T>(this);
 
         beanUsageBuilder.build();
 

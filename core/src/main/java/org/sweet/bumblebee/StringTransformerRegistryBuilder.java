@@ -2,11 +2,19 @@ package org.sweet.bumblebee;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sweet.bumblebee.registry.*;
+import org.sweet.bumblebee.registry.ArrayStringTransformerRegistryAdapter;
+import org.sweet.bumblebee.registry.DefaultStringTransformerRegistry;
+import org.sweet.bumblebee.registry.EnumStringTransformerRegistryAdapter;
+import org.sweet.bumblebee.registry.ExceptionStringTransformerRegistryAdapter;
+import org.sweet.bumblebee.registry.PrimitiveStringTransformerRegistryAdapter;
 import org.sweet.bumblebee.transformer.StringTransformerContext;
 import org.sweet.bumblebee.transformer.StringTransformerWithContext;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 
 public class StringTransformerRegistryBuilder {
 
@@ -55,7 +63,9 @@ public class StringTransformerRegistryBuilder {
     }
 
     public StringTransformerRegistryBuilder withAll() {
-        return withArray().withEnum().withException().withPrimitive();
+        return withArray().withEnum()
+                .withException()
+                .withPrimitive();
     }
 
     public StringTransformerRegistryBuilder withEnum() {
@@ -134,8 +144,10 @@ public class StringTransformerRegistryBuilder {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     private void registerTransformers(StringTransformerRegistry registry, StringTransformerContext context) {
-        for (Iterator<StringTransformer> it = ServiceLoader.load(StringTransformer.class).iterator(); it.hasNext(); ) {
+        for (Iterator<StringTransformer> it = ServiceLoader.load(StringTransformer.class)
+                .iterator(); it.hasNext(); ) {
             try {
                 registry.register(setContext(it.next(), context));
             } catch (ServiceConfigurationError e) {

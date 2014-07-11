@@ -11,6 +11,7 @@ public class EnumStringTransformerRegistryAdapter extends StringTransformerRegis
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> StringTransformer<T> getStringConverter(String name, Class<T> type) {
         StringTransformer<T> result = super.getStringConverter(name, type);
 
