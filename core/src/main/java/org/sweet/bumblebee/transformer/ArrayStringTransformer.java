@@ -28,12 +28,14 @@ public class ArrayStringTransformer<T> implements StringTransformer<T[]> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Class<T[]> getKey() {
         return (Class<T[]>) Array.newInstance(elementClass, 0)
                 .getClass();
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public T[] convert(String s) throws BumblebeeException {
         List<String> values = new ArrayList<String>();
 

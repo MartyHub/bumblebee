@@ -17,11 +17,13 @@ public class DefaultStringTransformerRegistry implements StringTransformerRegist
     private final Map<String, StringTransformer<?>> overridings = new HashMap<String, StringTransformer<?>>();
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> StringTransformer<T> register(StringTransformer<T> stringTransformer) {
         return (StringTransformer<T>) transformers.put(stringTransformer.getKey(), stringTransformer);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> StringTransformer<T> register(StringTransformer<T> stringTransformer, String name) {
         if (name == null) {
             return register(stringTransformer);
@@ -31,6 +33,7 @@ public class DefaultStringTransformerRegistry implements StringTransformerRegist
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> StringTransformer<T> getStringConverter(String name, Class<T> type) {
         StringTransformer result = null;
 
