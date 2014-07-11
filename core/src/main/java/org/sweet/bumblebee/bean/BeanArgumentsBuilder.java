@@ -11,8 +11,8 @@ public class BeanArgumentsBuilder<T> extends BeanBuilder<T> {
 
     private final Iterable<Argument> arguments;
 
-    public BeanArgumentsBuilder(BeanArgumentsIntrospector beanArgumentsIntrospector, Iterable<Argument> arguments) {
-        super(beanArgumentsIntrospector);
+    public BeanArgumentsBuilder(BeanArgumentsIntrospector beanArgumentsIntrospector, T bean, Iterable<Argument> arguments) {
+        super(beanArgumentsIntrospector, bean);
 
         this.arguments = arguments;
     }
@@ -33,7 +33,9 @@ public class BeanArgumentsBuilder<T> extends BeanBuilder<T> {
             final BeanArgumentAdapter beanArgumentAdapter = beanArgumentsIntrospector.getArgumentAdapter(argument.getName());
 
             if (beanArgumentAdapter == null) {
-                validationResult.addError(String.format("Unknown argument <%s>", argument.getName()));
+                if (failedOnUnknownArgument) {
+                    validationResult.addError(String.format("Unknown argument <%s>", argument.getName()));
+                }
             } else {
                 processArgument(beanArgumentAdapter, argument.getValue());
             }
@@ -54,12 +56,12 @@ public class BeanArgumentsBuilder<T> extends BeanBuilder<T> {
             return;
         }
 
-        beanArgumentAdapter.setArgumentValue(getBean(), value);
+        beanArgumentAdapter.setArgumentValue(bean, value);
     }
 
     private void checkMandatoryArguments() {
         for (BeanArgumentAdapter beanArgumentAdapter : beanArgumentsIntrospector) {
-            if (!beanArgumentAdapter.isOptional() && beanArgumentAdapter.getArgumentValue(getBean()) == null) {
+            if (!beanArgumentAdapter.isOptional() && beanArgumentAdapter.getArgumentValue(bean) == null) {
                 validationResult.addError(String.format("The following argument is mandatory : <%s>", beanArgumentAdapter.getDisplayName()));
             }
         }
@@ -67,11 +69,11 @@ public class BeanArgumentsBuilder<T> extends BeanBuilder<T> {
 
     private void validate() {
         for (BeanArgumentAdapter beanArgumentAdapter : beanArgumentsIntrospector) {
-            beanArgumentAdapter.validate(getBean(), validationResult);
+            beanArgumentAdapter.validate(bean, validationResult);
         }
 
-        if (getBean() instanceof ValidatableBean) {
-            ((ValidatableBean) getBean()).validate(validationResult);
+        if (bean instanceof ValidatableBean) {
+            ((ValidatableBean) bean).validate(validationResult);
         }
     }
 

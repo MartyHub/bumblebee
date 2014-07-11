@@ -64,7 +64,7 @@ public class BeanUsageBuilder<T> extends BeanBuilder<T> {
         sb.append(converter.getUsage());
         sb.append('>');
 
-        String defaultValue = beanArgumentAdapter.getDefaultValue(getBean());
+        String defaultValue = beanArgumentAdapter.getDefaultValue(bean);
 
         if (defaultValue != null) {
             sb.append(" (default to <");

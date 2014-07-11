@@ -7,30 +7,37 @@ public abstract class BeanBuilder<T> {
 
     protected final BeanArgumentsIntrospector<T> beanArgumentsIntrospector;
 
-    private T bean;
+    protected final boolean failedOnUnknownArgument;
+
+    protected final T bean;
 
     public BeanBuilder(BeanArgumentsIntrospector<T> beanArgumentsIntrospector) {
+        this(beanArgumentsIntrospector, null);
+    }
+
+    public BeanBuilder(BeanArgumentsIntrospector<T> beanArgumentsIntrospector, T bean) {
         if (beanArgumentsIntrospector == null) {
             throw new NullPointerException();
         }
 
         this.beanArgumentsIntrospector = beanArgumentsIntrospector;
-        this.bean = newBean();
+
+        if (bean == null) {
+            this.failedOnUnknownArgument = true;
+            this.bean = newBean();
+        } else {
+            this.failedOnUnknownArgument = false;
+            this.bean = bean;
+        }
     }
 
     public final T build() {
-        this.bean = newBean();
-
         doBuild();
 
         return bean;
     }
 
     protected abstract void doBuild();
-
-    protected final T getBean() {
-        return bean;
-    }
 
     private T newBean() {
         try {

@@ -76,7 +76,11 @@ public class BeanArgumentsIntrospector<T> implements Iterable<BeanArgumentAdapte
     }
 
     public T build(Iterable<Argument> arguments) {
-        return new BeanArgumentsBuilder<T>(this, arguments).build();
+        return new BeanArgumentsBuilder<T>(this, null, arguments).build();
+    }
+
+    public void fill(T bean, Iterable<Argument> arguments) {
+        new BeanArgumentsBuilder<T>(this, bean, arguments).build();
     }
 
     public String getUsage() {
