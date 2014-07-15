@@ -1,14 +1,9 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 
 public class PropertiesStringTransformer implements StringTransformer<Properties> {
@@ -19,7 +14,7 @@ public class PropertiesStringTransformer implements StringTransformer<Properties
     }
 
     @Override
-    public Properties convert(String s) throws BumblebeeException {
+    public Properties convert(String s) throws StringTransformerException {
         InputStream is = null;
         File propertiesFileName = new File(s);
 
@@ -29,13 +24,13 @@ public class PropertiesStringTransformer implements StringTransformer<Properties
 
                 return load(propertiesFileName.getAbsolutePath(), is);
             } catch (FileNotFoundException e) {
-                throw new BumblebeeException(String.format("Failed to find properties file <%s>", propertiesFileName.getAbsolutePath()));
+                throw new StringTransformerException(String.format("Failed to find properties file <%s>", propertiesFileName.getAbsolutePath()));
             }
         } else {
             is = ClassLoader.getSystemResourceAsStream(s);
 
             if (is == null) {
-                throw new BumblebeeException(String.format("Failed to read properties from <%s> : neither a file nor a classpath resource", s));
+                throw new StringTransformerException(String.format("Failed to read properties from <%s> : neither a file nor a classpath resource", s));
             }
 
             return load(s, is);
@@ -55,7 +50,7 @@ public class PropertiesStringTransformer implements StringTransformer<Properties
 
             return result;
         } catch (IOException e) {
-            throw new BumblebeeException(String.format("Failed to read properties from <%s>", source), e);
+            throw new StringTransformerException(String.format("Failed to read properties from <%s>", source), e);
         } finally {
             try {
                 is.close();

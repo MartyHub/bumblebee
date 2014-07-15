@@ -1,10 +1,9 @@
 package org.sweet.bumblebee.bean;
 
-import org.sweet.bumblebee.BumblebeeException;
+import org.sweet.bumblebee.BeanArgumentException;
 import org.sweet.bumblebee.Doc;
-import org.sweet.bumblebee.Optional;
-import org.sweet.bumblebee.util.ValidationResult;
 
+import javax.validation.constraints.NotNull;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -26,7 +25,7 @@ public class BeanArgumentAdapter implements Comparable<BeanArgumentAdapter> {
 
     private final boolean subProperty;
 
-    public BeanArgumentAdapter(PropertyDescriptor propertyDescriptor) {
+    public BeanArgumentAdapter(Class<?> beanClass, PropertyDescriptor propertyDescriptor) {
         if (propertyDescriptor == null) {
             throw new NullPointerException();
         }
@@ -34,14 +33,26 @@ public class BeanArgumentAdapter implements Comparable<BeanArgumentAdapter> {
         Method writeMethod = propertyDescriptor.getWriteMethod();
 
         if (writeMethod == null) {
-            throw new BumblebeeException(String.format("Failed to find a setter for <%s>", propertyDescriptor));
+            throw new BeanArgumentException(String.format("Failed to find a setter for <%s>", propertyDescriptor));
         }
 
         this.javaName = propertyDescriptor.getName();
         this.displayName = javaName;
         this.type = propertyDescriptor.getPropertyType();
         this.subProperty = false;
-        this.optional = writeMethod.getAnnotation(Optional.class) != null;
+
+        if (type.isPrimitive()) {
+            this.optional = true;
+        } else {
+            NotNull notNull = null;
+
+            try {
+                notNull = beanClass.getDeclaredField(javaName).getAnnotation(NotNull.class);
+            } catch (NoSuchFieldException e) {
+            }
+
+            this.optional = notNull == null;
+        }
 
         Doc docAnnotation = writeMethod.getAnnotation(Doc.class);
 
@@ -115,8 +126,7 @@ public class BeanArgumentAdapter implements Comparable<BeanArgumentAdapter> {
             final Object value = getArgumentValue(bean);
 
             if (value != null) {
-                if (value.getClass()
-                        .isArray()) {
+                if (value.getClass().isArray()) {
                     StringBuilder sb = new StringBuilder();
 
                     for (int i = 0, length = Array.getLength(value); i < length; ++i) {
@@ -166,28 +176,6 @@ public class BeanArgumentAdapter implements Comparable<BeanArgumentAdapter> {
         setProperty(safeBean, propertyName, value);
     }
 
-    public void validate(Object bean, ValidationResult validationResult) {
-        if (subProperty) {
-            Object safeBean = bean;
-
-            for (StringTokenizer st = new StringTokenizer(javaName, "."); st.hasMoreTokens(); ) {
-                final String propertyName = st.nextToken();
-                final PropertyDescriptor propertyDescriptor = getPropertyDescriptor(safeBean, propertyName);
-                Object propertyValue = getProperty(safeBean, propertyDescriptor);
-
-                if (propertyValue == null) {
-                    break;
-                }
-
-                if (propertyValue instanceof ValidatableBean) {
-                    ((ValidatableBean) propertyValue).validate(validationResult);
-                }
-
-                safeBean = propertyValue;
-            }
-        }
-    }
-
     @Override
     public int compareTo(BeanArgumentAdapter other) {
         int result = 0;
@@ -233,44 +221,39 @@ public class BeanArgumentAdapter implements Comparable<BeanArgumentAdapter> {
 
     private void setProperty(Object bean, PropertyDescriptor propertyDescriptor, Object value) {
         try {
-            propertyDescriptor.getWriteMethod()
-                    .invoke(bean, value);
+            propertyDescriptor.getWriteMethod().invoke(bean, value);
         } catch (Exception e) {
-            throw new BumblebeeException(String.format("Failed to set property <%s> on bean <%s> with value <%s>", propertyDescriptor.getName(), bean, value), e);
+            throw new BeanArgumentException(String.format("Failed to set property <%s> on bean <%s> with value <%s>", propertyDescriptor.getName(), bean, value), e);
         }
     }
 
     private Object getProperty(Object bean, PropertyDescriptor propertyDescriptor) {
         try {
-            return propertyDescriptor.getReadMethod()
-                    .invoke(bean);
+            return propertyDescriptor.getReadMethod().invoke(bean);
         } catch (Exception e) {
-            throw new BumblebeeException(String.format("Failed to get property <%s> on bean <%s>", propertyDescriptor.getName(), bean), e);
+            throw new BeanArgumentException(String.format("Failed to get property <%s> on bean <%s>", propertyDescriptor.getName(), bean), e);
         }
     }
 
     private PropertyDescriptor getPropertyDescriptor(Object bean, String propertyName) {
         try {
-            for (PropertyDescriptor propertyDescriptor : Introspector.getBeanInfo(bean.getClass())
-                    .getPropertyDescriptors()) {
-                if (propertyDescriptor.getName()
-                        .equals(propertyName)) {
+            for (PropertyDescriptor propertyDescriptor : Introspector.getBeanInfo(bean.getClass()).getPropertyDescriptors()) {
+                if (propertyDescriptor.getName().equals(propertyName)) {
                     return propertyDescriptor;
                 }
             }
         } catch (IntrospectionException e) {
-            throw new BumblebeeException(String.format("Failed to introspect class <%s>", bean.getClass()), e);
+            throw new BeanArgumentException(String.format("Failed to introspect class <%s>", bean.getClass()), e);
         }
 
-        throw new BumblebeeException(String.format("Failed to find property <%s> for bean <%s>", propertyName, bean));
+        throw new BeanArgumentException(String.format("Failed to find property <%s> for bean <%s>", propertyName, bean));
     }
 
     private Object newInstance(PropertyDescriptor propertyDescriptor) {
         try {
-            return propertyDescriptor.getPropertyType()
-                    .newInstance();
+            return propertyDescriptor.getPropertyType().newInstance();
         } catch (Exception e) {
-            throw new BumblebeeException(String.format("Failed to create new instance of <%s>", propertyDescriptor.getPropertyType()), e);
+            throw new BeanArgumentException(String.format("Failed to create new instance of <%s>", propertyDescriptor.getPropertyType()), e);
         }
     }
 }

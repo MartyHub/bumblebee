@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 import org.sweet.bumblebee.util.Joiner;
 
 public class BooleanStringTransformer implements StringTransformer<Boolean>, StringTransformerWithContext {
@@ -19,21 +19,19 @@ public class BooleanStringTransformer implements StringTransformer<Boolean>, Str
     }
 
     @Override
-    public Boolean convert(String s) throws BumblebeeException {
+    public Boolean convert(String s) throws StringTransformerException {
         if (contains(context.getTrueMappings(), s)) {
             return Boolean.TRUE;
         } else if (contains(context.getFalseMappings(), s)) {
             return Boolean.FALSE;
         } else {
-            throw new BumblebeeException(String.format("Invalid boolean value <%s>, must be one of <%s>", s, getUsage()));
+            throw new StringTransformerException(String.format("Invalid boolean value <%s>, must be one of <%s>", s, getUsage()));
         }
     }
 
     @Override
     public String getUsage() {
-        return new Joiner().append(context.getTrueMappings())
-                .append(context.getFalseMappings())
-                .toString();
+        return new Joiner().append(context.getTrueMappings()).append(context.getFalseMappings()).toString();
     }
 
     private boolean contains(String[] values, String s) {

@@ -3,21 +3,26 @@ package org.sweet.bumblebee.bean;
 import org.sweet.bumblebee.BeanArgumentsIntrospector;
 import org.sweet.bumblebee.StringTransformer;
 
-public class BeanUsageBuilder<T> extends BeanBuilder<T> {
+public class BeanUsageBuilder<T> {
 
     private final String newLine = System.getProperty("line.separator");
+
+    private final BeanArgumentsIntrospector<T> beanArgumentsIntrospector;
+
+    private T bean;
 
     private StringBuilder sb;
 
     public BeanUsageBuilder(BeanArgumentsIntrospector<T> beanArgumentsIntrospector) {
-        super(beanArgumentsIntrospector);
+        if (beanArgumentsIntrospector == null) {
+            throw new NullPointerException();
+        }
+
+        this.beanArgumentsIntrospector = beanArgumentsIntrospector;
     }
 
-    public String getUsage() {
-        return sb.toString();
-    }
-
-    protected void doBuild() {
+    public String build() {
+        bean = beanArgumentsIntrospector.newBean();
         sb = new StringBuilder();
 
         appendln(" Arguments :");
@@ -26,6 +31,8 @@ public class BeanUsageBuilder<T> extends BeanBuilder<T> {
 
         newLine();
         appendln("* indicates mandatory arguments");
+
+        return sb.toString();
     }
 
     private void appendln(String s) {
@@ -58,8 +65,7 @@ public class BeanUsageBuilder<T> extends BeanBuilder<T> {
         sb.append("=<");
 
         Class<?> type = beanArgumentAdapter.getType();
-        StringTransformer<?> converter = beanArgumentsIntrospector.getStringTransformerRegistry()
-                .getStringConverter(beanArgumentAdapter.getJavaName(), type);
+        StringTransformer<?> converter = beanArgumentsIntrospector.getStringTransformerRegistry().getStringConverter(beanArgumentAdapter.getJavaName(), type);
 
         sb.append(converter.getUsage());
         sb.append('>');

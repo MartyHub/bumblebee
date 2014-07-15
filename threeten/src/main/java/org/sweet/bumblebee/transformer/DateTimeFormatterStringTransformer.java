@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 import org.sweet.bumblebee.util.Joiner;
 import org.threeten.bp.format.DateTimeFormatter;
 import org.threeten.bp.format.DateTimeParseException;
@@ -16,12 +16,12 @@ public abstract class DateTimeFormatterStringTransformer<T> implements StringTra
     }
 
     protected DateTimeFormatterStringTransformer(String pattern) {
-        this.patterns = new String[] {pattern};
-        this.formatters = new DateTimeFormatter[] {DateTimeFormatter.ofPattern(pattern)};
+        this.patterns = new String[]{pattern};
+        this.formatters = new DateTimeFormatter[]{DateTimeFormatter.ofPattern(pattern)};
     }
 
     @Override
-    public T convert(String s) throws BumblebeeException {
+    public T convert(String s) throws StringTransformerException {
         for (DateTimeFormatter formatter : formatters) {
             try {
                 return doConvert(s, formatter);
@@ -29,7 +29,7 @@ public abstract class DateTimeFormatterStringTransformer<T> implements StringTra
             }
         }
 
-        throw new BumblebeeException(String.format("Failed to parse <%s> with pattern(s) <%s>", s, getUsage()));
+        throw new StringTransformerException(String.format("Failed to parse <%s> with pattern(s) <%s>", s, getUsage()));
     }
 
     @Override
@@ -51,5 +51,5 @@ public abstract class DateTimeFormatterStringTransformer<T> implements StringTra
         }
     }
 
-    protected abstract T doConvert(String s, DateTimeFormatter formatter) throws BumblebeeException;
+    protected abstract T doConvert(String s, DateTimeFormatter formatter) throws StringTransformerException;
 }

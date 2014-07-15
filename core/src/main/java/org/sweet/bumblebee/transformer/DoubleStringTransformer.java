@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 
 public class DoubleStringTransformer implements StringTransformer<Double> {
 
@@ -11,11 +11,11 @@ public class DoubleStringTransformer implements StringTransformer<Double> {
     }
 
     @Override
-    public Double convert(String s) throws BumblebeeException {
+    public Double convert(String s) throws StringTransformerException {
         try {
             return Double.valueOf(s);
         } catch (NumberFormatException e) {
-            throw new BumblebeeException(String.format("Invalid double value <%s>", s), e);
+            throw new StringTransformerException(String.format("Invalid double value <%s>", s), e);
         }
     }
 

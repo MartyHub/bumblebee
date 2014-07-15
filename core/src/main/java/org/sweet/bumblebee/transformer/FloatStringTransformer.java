@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 
 public class FloatStringTransformer implements StringTransformer<Float> {
 
@@ -11,11 +11,11 @@ public class FloatStringTransformer implements StringTransformer<Float> {
     }
 
     @Override
-    public Float convert(String s) throws BumblebeeException {
+    public Float convert(String s) throws StringTransformerException {
         try {
             return Float.valueOf(s);
         } catch (NumberFormatException e) {
-            throw new BumblebeeException(String.format("Invalid float value <%s>", s), e);
+            throw new StringTransformerException(String.format("Invalid float value <%s>", s), e);
         }
     }
 

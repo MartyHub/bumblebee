@@ -4,7 +4,7 @@ public interface StringTransformer<T> {
 
     Class<T> getKey();
 
-    T convert(String s) throws BumblebeeException;
+    T convert(String s) throws StringTransformerException;
 
     String getUsage();
 }

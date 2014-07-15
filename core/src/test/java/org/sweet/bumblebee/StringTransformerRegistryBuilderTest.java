@@ -27,11 +27,10 @@ public class StringTransformerRegistryBuilderTest {
 
     @Before
     public void setup() {
-        stringTransformerRegistry = new StringTransformerRegistryBuilder().withAll()
-                .build();
+        stringTransformerRegistry = new StringTransformerRegistryBuilder().withAll().build();
     }
 
-    @Test(expected = BumblebeeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void convert_unknown() {
         test(Void.class, "whatever", null);
     }
@@ -195,8 +194,7 @@ public class StringTransformerRegistryBuilderTest {
     }
 
     private <T> void test(String name, Class<T> type, String s, T value) {
-        assertThat(stringTransformerRegistry.getStringConverter(name, type)
-                .convert(s), equalTo(value));
+        assertThat(stringTransformerRegistry.getStringConverter(name, type).convert(s), equalTo(value));
 
         test_array(name, type, s, value);
     }
@@ -207,7 +205,6 @@ public class StringTransformerRegistryBuilderTest {
         Array.set(values, 0, value);
         Array.set(values, 1, value);
 
-        assertThat(stringTransformerRegistry.getStringConverter(name, values.getClass())
-                .convert(s + "," + s), equalTo(values));
+        assertThat(stringTransformerRegistry.getStringConverter(name, values.getClass()).convert(s + "," + s), equalTo(values));
     }
 }

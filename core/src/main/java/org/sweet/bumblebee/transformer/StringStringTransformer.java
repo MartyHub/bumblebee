@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 
 public class StringStringTransformer implements StringTransformer<String> {
 
@@ -11,7 +11,7 @@ public class StringStringTransformer implements StringTransformer<String> {
     }
 
     @Override
-    public String convert(String s) throws BumblebeeException {
+    public String convert(String s) throws StringTransformerException {
         return s;
     }
 

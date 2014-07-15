@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 
 public class ShortStringTransformer implements StringTransformer<Short> {
 
@@ -11,11 +11,11 @@ public class ShortStringTransformer implements StringTransformer<Short> {
     }
 
     @Override
-    public Short convert(String s) throws BumblebeeException {
+    public Short convert(String s) throws StringTransformerException {
         try {
             return Short.valueOf(s);
         } catch (NumberFormatException e) {
-            throw new BumblebeeException(String.format("Invalid short value <%s>", s), e);
+            throw new StringTransformerException(String.format("Invalid short value <%s>", s), e);
         }
     }
 

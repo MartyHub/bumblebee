@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class ArrayStringTransformer<T> implements StringTransformer<T[]> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public T[] convert(String s) throws BumblebeeException {
+    public T[] convert(String s) throws StringTransformerException {
         List<String> values = new ArrayList<String>();
 
         for (StringTokenizer tokenizer = new StringTokenizer(s, ","); tokenizer.hasMoreTokens(); ) {

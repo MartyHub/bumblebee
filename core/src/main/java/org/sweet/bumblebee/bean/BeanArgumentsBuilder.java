@@ -1,85 +1,97 @@
 package org.sweet.bumblebee.bean;
 
+import org.sweet.bumblebee.BeanArgumentException;
 import org.sweet.bumblebee.BeanArgumentsIntrospector;
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
-import org.sweet.bumblebee.util.ValidationResult;
+import org.sweet.bumblebee.StringTransformerException;
 
-public class BeanArgumentsBuilder<T> extends BeanBuilder<T> {
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.util.Collections;
+import java.util.Set;
 
-    private final ValidationResult validationResult = new ValidationResult();
+public class BeanArgumentsBuilder<T> {
+
+    private final BeanArgumentsIntrospector<T> beanArgumentsIntrospector;
 
     private final Iterable<Argument> arguments;
 
-    public BeanArgumentsBuilder(BeanArgumentsIntrospector<T> beanArgumentsIntrospector, T bean, Iterable<Argument> arguments) {
-        super(beanArgumentsIntrospector, bean);
+    private T bean;
 
+    private Validator validator;
+
+    private Set<ConstraintViolation<T>> constraintViolations;
+
+    public BeanArgumentsBuilder(BeanArgumentsIntrospector<T> beanArgumentsIntrospector, Iterable<Argument> arguments) {
+        if (beanArgumentsIntrospector == null) {
+            throw new NullPointerException();
+        }
+
+        if (arguments == null) {
+            throw new NullPointerException();
+        }
+
+        this.beanArgumentsIntrospector = beanArgumentsIntrospector;
         this.arguments = arguments;
     }
 
-    protected void doBuild() {
-        processArguments(arguments);
-        checkValidationResult();
+    public BeanArgumentsBuilder<T> withBean(T bean) {
+        this.bean = bean;
 
-        checkMandatoryArguments();
-        checkValidationResult();
-
-        validate();
-        checkValidationResult();
+        return this;
     }
 
-    private void processArguments(Iterable<Argument> arguments) {
+    public BeanArgumentsBuilder<T> withValidator(Validator validator) {
+        this.validator = validator;
+
+        return this;
+    }
+
+    public T build() {
+        if (bean == null) {
+            bean = beanArgumentsIntrospector.newBean();
+        }
+
+        processArguments();
+        validate();
+
+        return bean;
+    }
+
+    public Set<ConstraintViolation<T>> getConstraintViolations() {
+        if (constraintViolations == null) {
+            return Collections.emptySet();
+        }
+
+        return constraintViolations;
+    }
+
+    private void processArguments() {
         for (Argument argument : arguments) {
             final BeanArgumentAdapter beanArgumentAdapter = beanArgumentsIntrospector.getArgumentAdapter(argument.getName());
 
-            if (beanArgumentAdapter == null) {
-                if (failedOnUnknownArgument) {
-                    validationResult.addError(String.format("Unknown argument <%s>", argument.getName()));
-                }
-            } else {
+            if (beanArgumentAdapter != null) {
                 processArgument(beanArgumentAdapter, argument.getValue());
             }
         }
     }
 
     private void processArgument(BeanArgumentAdapter beanArgumentAdapter, String argumentValue) {
-        StringTransformer<?> stringTransformer = beanArgumentsIntrospector.getStringTransformerRegistry()
-                .getStringConverter(beanArgumentAdapter.getJavaName(), beanArgumentAdapter.getType());
+        StringTransformer<?> stringTransformer = beanArgumentsIntrospector.getStringTransformerRegistry().getStringConverter(beanArgumentAdapter.getJavaName(), beanArgumentAdapter.getType());
         Object value;
 
         try {
             value = stringTransformer.convert(argumentValue);
-        } catch (BumblebeeException e) {
-            validationResult.addError(String.format("Invalid value <%s> for argument <%s>, must be <%s>", argumentValue, beanArgumentAdapter.getDisplayName(),
-                    stringTransformer.getUsage()));
-
-            return;
+        } catch (StringTransformerException e) {
+            throw new BeanArgumentException(String.format("Invalid value <%s> for argument <%s>, must be <%s>", argumentValue, beanArgumentAdapter.getDisplayName(), stringTransformer.getUsage()), e);
         }
 
         beanArgumentAdapter.setArgumentValue(bean, value);
     }
 
-    private void checkMandatoryArguments() {
-        for (BeanArgumentAdapter beanArgumentAdapter : beanArgumentsIntrospector) {
-            if (!beanArgumentAdapter.isOptional() && beanArgumentAdapter.getArgumentValue(bean) == null) {
-                validationResult.addError(String.format("The following argument is mandatory : <%s>", beanArgumentAdapter.getDisplayName()));
-            }
-        }
-    }
-
     private void validate() {
-        for (BeanArgumentAdapter beanArgumentAdapter : beanArgumentsIntrospector) {
-            beanArgumentAdapter.validate(bean, validationResult);
-        }
-
-        if (bean instanceof ValidatableBean) {
-            ((ValidatableBean) bean).validate(validationResult);
-        }
-    }
-
-    private void checkValidationResult() {
-        if (!validationResult.isOk()) {
-            throw new BumblebeeException(validationResult.toString());
+        if (validator != null) {
+            constraintViolations = validator.validate(bean);
         }
     }
 }

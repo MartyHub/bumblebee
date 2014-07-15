@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 
 import java.sql.Timestamp;
 
@@ -13,11 +13,11 @@ public class TimestampStringTransformer implements StringTransformer<Timestamp> 
     }
 
     @Override
-    public Timestamp convert(String s) throws BumblebeeException {
+    public Timestamp convert(String s) throws StringTransformerException {
         try {
             return Timestamp.valueOf(s);
         } catch (IllegalArgumentException e) {
-            throw new BumblebeeException(String.format("Failed to parse <%s> with pattern <%s>", s, getUsage()), e);
+            throw new StringTransformerException(String.format("Failed to parse <%s> with pattern <%s>", s, getUsage()), e);
         }
     }
 

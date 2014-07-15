@@ -1,6 +1,5 @@
 package org.sweet.bumblebee.registry;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
 import org.sweet.bumblebee.StringTransformerRegistry;
 
@@ -15,7 +14,7 @@ public class ExceptionStringTransformerRegistryAdapter extends StringTransformer
         StringTransformer<T> result = super.getStringConverter(name, type);
 
         if (result == null) {
-            throw new BumblebeeException(String.format("Don't know how to handle <%s>", type));
+            throw new IllegalArgumentException(String.format("Don't know how to handle <%s>", type));
         }
 
         return result;

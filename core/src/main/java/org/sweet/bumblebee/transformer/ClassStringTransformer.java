@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 
 public class ClassStringTransformer implements StringTransformer<Class> {
 
@@ -11,11 +11,11 @@ public class ClassStringTransformer implements StringTransformer<Class> {
     }
 
     @Override
-    public Class convert(String s) throws BumblebeeException {
+    public Class convert(String s) throws StringTransformerException {
         try {
             return Class.forName(s);
         } catch (ClassNotFoundException e) {
-            throw new BumblebeeException(String.format("Failed to lookup class <%s>", s), e);
+            throw new StringTransformerException(String.format("Failed to lookup class <%s>", s), e);
         }
     }
 

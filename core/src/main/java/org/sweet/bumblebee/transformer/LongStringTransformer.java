@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 
 public class LongStringTransformer implements StringTransformer<Long> {
 
@@ -11,11 +11,11 @@ public class LongStringTransformer implements StringTransformer<Long> {
     }
 
     @Override
-    public Long convert(String s) throws BumblebeeException {
+    public Long convert(String s) throws StringTransformerException {
         try {
             return Long.valueOf(s);
         } catch (NumberFormatException e) {
-            throw new BumblebeeException(String.format("Invalid long value <%s>", s), e);
+            throw new StringTransformerException(String.format("Invalid long value <%s>", s), e);
         }
     }
 

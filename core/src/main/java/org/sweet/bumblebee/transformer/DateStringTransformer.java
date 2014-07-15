@@ -1,7 +1,7 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
 import org.sweet.bumblebee.StringTransformer;
+import org.sweet.bumblebee.StringTransformerException;
 import org.sweet.bumblebee.util.Joiner;
 
 import java.text.ParseException;
@@ -21,7 +21,7 @@ public class DateStringTransformer implements StringTransformer<Date>, StringTra
     public DateStringTransformer(String pattern) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 
-        this.simpleDateFormats = new SimpleDateFormat[] {simpleDateFormat};
+        this.simpleDateFormats = new SimpleDateFormat[]{simpleDateFormat};
     }
 
     @Override
@@ -44,7 +44,7 @@ public class DateStringTransformer implements StringTransformer<Date>, StringTra
     }
 
     @Override
-    public Date convert(String s) throws BumblebeeException {
+    public Date convert(String s) throws StringTransformerException {
         for (SimpleDateFormat simpleDateFormat : simpleDateFormats) {
             try {
                 return simpleDateFormat.parse(s);
@@ -52,7 +52,7 @@ public class DateStringTransformer implements StringTransformer<Date>, StringTra
             }
         }
 
-        throw new BumblebeeException(String.format("Failed to parse <%s> with pattern(s) <%s>", s, getUsage()));
+        throw new StringTransformerException(String.format("Failed to parse <%s> with pattern(s) <%s>", s, getUsage()));
     }
 
     @Override

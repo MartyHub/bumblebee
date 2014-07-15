@@ -1,6 +1,6 @@
 package org.sweet.bumblebee.transformer;
 
-import org.sweet.bumblebee.BumblebeeException;
+import org.sweet.bumblebee.StringTransformerException;
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.format.DateTimeFormatter;
 
@@ -24,7 +24,7 @@ public class LocalDateStringTransformer extends DateTimeFormatterStringTransform
     }
 
     @Override
-    protected LocalDate doConvert(String s, DateTimeFormatter formatter) throws BumblebeeException {
+    protected LocalDate doConvert(String s, DateTimeFormatter formatter) throws StringTransformerException {
         return LocalDate.parse(s, formatter);
     }
 }

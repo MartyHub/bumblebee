@@ -35,8 +35,7 @@ public class BeanArgumentsIntrospector<T> implements Iterable<BeanArgumentAdapte
         this.beanClass = beanClass;
 
         try {
-            PropertyDescriptor[] propertyDescriptors = Introspector.getBeanInfo(beanClass)
-                    .getPropertyDescriptors();
+            PropertyDescriptor[] propertyDescriptors = Introspector.getBeanInfo(beanClass).getPropertyDescriptors();
 
             this.argumentByDisplayName = new HashMap<String, BeanArgumentAdapter>(propertyDescriptors.length);
 
@@ -48,22 +47,29 @@ public class BeanArgumentsIntrospector<T> implements Iterable<BeanArgumentAdapte
 
                     try {
                         stringTransformer = stringTransformerRegistry.getStringConverter(propertyName, propertyType);
-                    } catch (BumblebeeException ce) {
+                    } catch (Exception e) {
                     }
 
                     if (stringTransformer == null) {
                         // try as sub property
-                        for (BeanArgumentAdapter subBeanArgumentAdapter : (Iterable<BeanArgumentAdapter>) new BeanArgumentsIntrospector(stringTransformerRegistry,
-                                propertyType)) {
+                        for (BeanArgumentAdapter subBeanArgumentAdapter : (Iterable<BeanArgumentAdapter>) new BeanArgumentsIntrospector(stringTransformerRegistry, propertyType)) {
                             addArgumentAdapter(subBeanArgumentAdapter.withPrefix(propertyName));
                         }
                     } else {
-                        addArgumentAdapter(new BeanArgumentAdapter(propertyDescriptor));
+                        addArgumentAdapter(new BeanArgumentAdapter(beanClass, propertyDescriptor));
                     }
                 }
             }
         } catch (IntrospectionException e) {
-            throw new BumblebeeException(String.format("Failed to introspect class <%s>", beanClass), e);
+            throw new BeanArgumentException(String.format("Failed to introspect class <%s>", beanClass), e);
+        }
+    }
+
+    public T newBean() {
+        try {
+            return beanClass.newInstance();
+        } catch (Exception e) {
+            throw new BeanArgumentException(String.format("Failed to create new instance of <%s>", beanClass), e);
         }
     }
 
@@ -76,20 +82,12 @@ public class BeanArgumentsIntrospector<T> implements Iterable<BeanArgumentAdapte
         return new TreeSet<BeanArgumentAdapter>(argumentByDisplayName.values()).iterator();
     }
 
-    public T build(Iterable<Argument> arguments) {
-        return new BeanArgumentsBuilder<T>(this, null, arguments).build();
-    }
-
-    public void fill(T bean, Iterable<Argument> arguments) {
-        new BeanArgumentsBuilder<T>(this, bean, arguments).build();
+    public BeanArgumentsBuilder<T> builder(Iterable<Argument> arguments) {
+        return new BeanArgumentsBuilder<T>(this, arguments);
     }
 
     public String getUsage() {
-        BeanUsageBuilder<T> beanUsageBuilder = new BeanUsageBuilder<T>(this);
-
-        beanUsageBuilder.build();
-
-        return beanUsageBuilder.getUsage();
+        return new BeanUsageBuilder<T>(this).build();
     }
 
     public Class<T> getBeanClass() {
